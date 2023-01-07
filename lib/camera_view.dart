@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:async/async.dart';
 import 'package:camera/camera.dart';
@@ -7,9 +6,6 @@ import 'package:demo/painters/object_detector_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
-import 'package:image/image.dart' as img;
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:touchable/touchable.dart';
 import 'main.dart';
 
@@ -124,32 +120,40 @@ class _CameraViewState extends State<CameraView> {
                                     imageSnapshot
                                         .data!.inputImageData!.imageRotation,
                                     imageSnapshot.data!.inputImageData!.size,
-                                    (object) {
-                                      final img.Image? originalImage =
-                                          img.decodeImage(
-                                              imageSnapshot.data!.bytes!);
+                                    (object) async {
+                                      // try {
+                                        // print(
+                                        //     imageSnapshot.data!.inputImageData);
 
-                                      if (originalImage == null) {
-                                        print("Image is null");
-                                        return;
-                                      }
+                                        // final img.Image? originalImage =
+                                        //     img.decodeImage(
+                                        //   imageSnapshot.data!.bytes!.toList(),
+                                        // );
 
-                                      final croppedImage = img.copyCrop(
-                                        originalImage,
-                                        object.boundingBox.left.toInt(),
-                                        object.boundingBox.top.toInt(),
-                                        object.boundingBox.width.toInt(),
-                                        object.boundingBox.height.toInt(),
-                                      );
+                                        // if (originalImage == null) {
+                                        //   print("Image is null");
+                                        //   return;
+                                        // }
 
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return Image.memory(
-                                            croppedImage.getBytes(),
-                                          );
-                                        },
-                                      );
+                                        // final croppedImage = img.copyCrop(
+                                        //   originalImage,
+                                        //   object.boundingBox.left.toInt(),
+                                        //   object.boundingBox.top.toInt(),
+                                        //   object.boundingBox.width.toInt(),
+                                        //   object.boundingBox.height.toInt(),
+                                        // );
+
+                                        // showDialog(
+                                        //   context: context,
+                                        //   builder: (context) {
+                                        //     return Image.memory(
+                                        //       croppedImage.getBytes(),
+                                        //     );
+                                        //   },
+                                        // );
+                                      // } catch (e) {
+                                      //   print(e);
+                                      // }
                                     },
                                   ),
                                 );
@@ -200,37 +204,36 @@ class _CameraViewState extends State<CameraView> {
 
   Future<ObjectDetector> _initializeDetector(DetectionMode mode) async {
     // uncomment next lines if you want to use the default model
-    // final options = ObjectDetectorOptions(
-    //     mode: mode,
-    //     classifyObjects: true,
-    //     multipleObjects: true);
-    // _objectDetector = ObjectDetector(options: options);
+    final options = ObjectDetectorOptions(
+        mode: mode,
+        classifyObjects: true,
+        multipleObjects: true);
 
     // uncomment next lines if you want to use a local model
     // make sure to add tflite model to assets/ml
-    const modelPath = 'assets/ml/object_labeler.tflite';
-    String path;
+    // const modelPath = 'assets/ml/object_labeler.tflite';
+    // String path;
 
-    if (io.Platform.isAndroid) {
-      path = 'flutter_assets/$modelPath';
-    } else {
-      path = '${(await getApplicationSupportDirectory()).path}/$modelPath';
-      await io.Directory(dirname(path)).create(recursive: true);
-      final file = io.File(path);
-      if (!await file.exists()) {
-        final byteData = await rootBundle.load(modelPath);
-        await file.writeAsBytes(byteData.buffer
-            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      }
-      path = file.path;
-    }
+    // if (io.Platform.isAndroid) {
+    //   path = 'flutter_assets/$modelPath';
+    // } else {
+    //   path = '${(await getApplicationSupportDirectory()).path}/$modelPath';
+    //   await io.Directory(dirname(path)).create(recursive: true);
+    //   final file = io.File(path);
+    //   if (!await file.exists()) {
+    //     final byteData = await rootBundle.load(modelPath);
+    //     await file.writeAsBytes(byteData.buffer
+    //         .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    //   }
+    //   path = file.path;
+    // }
 
-    final options = LocalObjectDetectorOptions(
-      mode: mode,
-      modelPath: path,
-      classifyObjects: true,
-      multipleObjects: true,
-    );
+    // final options = LocalObjectDetectorOptions(
+    //   mode: mode,
+    //   modelPath: path,
+    //   classifyObjects: true,
+    //   multipleObjects: true,
+    // );
 
     return ObjectDetector(options: options);
   }
